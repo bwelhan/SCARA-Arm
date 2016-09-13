@@ -1,0 +1,4 @@
+Running the SCARA Arm on the Pi
+
+file located in: home/Arm/arm2.cpp
+run the file using: sudo ./arm2
