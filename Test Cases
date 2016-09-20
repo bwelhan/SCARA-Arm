@@ -1,3 +1,10 @@
+*********
+Singularity solution: make sure the arm cannot move into a position where the distance 
+between joints exceeds 2x the length of arms (ideally 80% of 2x Length).
+Can then do a check to see if the new movement will decrease or increase the distance between
+the arms. If decrease then movement is allowed. If increase then no movement occurs.
+*********
+
 1. Both motors moving in opposite directions
   - Limit motors to not be able to have angles greater than a limit (probably ~45 degrees)
 2. Both motors moving towards each other
