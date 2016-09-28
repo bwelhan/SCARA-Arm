@@ -44,7 +44,7 @@ public class ToolPath
     public ToolPath()
     {
         // initialise instance variables
-        n_steps = 60;
+        n_steps = 50;
         theta1_vector = new ArrayList<Double>();
         theta2_vector = new ArrayList<Double>();
         pen_vector = new ArrayList<Integer>();
@@ -55,25 +55,51 @@ public class ToolPath
     }
 
     /**********CONVERT (X,Y) PATH into angles******************/
-    public void convert_drawing_to_angles(Drawing drawing,Arm arm,String fname){
+    
+    /**
+     * Convert the current drawning into it's respective PWM values
+     * 
+     * @param drawing is the current drawing
+     * @param arm is the current simulated scara arm
+     * @param fname is the name of the file you would like to save it to
+     */
+    public void convert_drawing_to_angles(Drawing drawing, Arm arm, String fname){
 
-        // for all points of the drawing...        
-        for (int i = 0;i < drawing.get_drawing_size()-1;i++){ 
-            // take two points
+        // Iterate through every point in the drawing       
+        for (int i = 0; i < drawing.get_drawing_size()-1; i++){ 
+
+            // Choose two subsequent points
             PointXY p0 = drawing.get_drawing_point(i);
             PointXY p1 = drawing.get_drawing_point(i+1);
-            // break line between points into segments: n_steps of them
-            for ( int j = 0 ; j< n_steps;j++) { // break segment into n_steps str. lines
+
+            // Break the line into n_steps
+            for ( int j = 0 ; j< n_steps; j++) {
+                // Interpolate to find each point along the line
                 double x = p0.get_x() + j*(p1.get_x()-p0.get_x())/n_steps;
                 double y = p0.get_y() + j*(p1.get_y()-p0.get_y())/n_steps;
+
+                // Calculate the angles
                 arm.inverseKinematic(x, y);
+
+                // Convert to degrees
                 theta1_vector.add(arm.get_theta1()*180/Math.PI);
-                theta2_vector.add(arm.get_theta2()*180/Math.PI);
-                pwm1_vector.add(arm.get_pwm1());
-                pwm2_vector.add(arm.get_pwm2());
+                theta2_vector.add(arm.get_theta2()*180/Math.PI); 
+
+                // If the pen is down.  Add the point twice, first with the pen down.  Then with it up.
                 if (p0.get_pen()){ 
-                    pen_vector.add(1);
+
+                    // Add the PWM values to the vector with pen down
+                    pwm1_vector.add(arm.get_pwm1());
+                    pwm2_vector.add(arm.get_pwm2());
                     pwm3_vector.add(1900);
+
+                    // Add PWM values to vector again with pen up.
+                    pwm1_vector.add(arm.get_pwm1());
+                    pwm2_vector.add(arm.get_pwm2());
+                    pwm3_vector.add(1100);
+
+                    // Arthur's thing:  pen_vector.add(1);
+
                 } else {
                     pen_vector.add(0);
                     pwm3_vector.add(1100);
@@ -85,6 +111,42 @@ public class ToolPath
 
     }
 
+
+    /**
+     * Once the PWM values have been entered simply write them to a file.
+     */
+    public void save_pwm_file(String fname){
+
+        try{
+            // Create a new PrintStream to writing to the file.
+            PrintStream ps = new PrintStream(new File(fname));
+            
+            // Iterate through all of the values adding them to a txt file.
+            for(int i = 0; i < pwm1_vector.size()-1; i++){
+                ps.println(pwm1_vector.get(i)+ "," + pwm2_vector.get(i) + "," + pwm3_vector.get(i));
+                UI.println(pwm1_vector.get(i)+ "," + pwm2_vector.get(i) + "," + pwm3_vector.get(i));
+            }
+            
+            // Close the Print Stream
+            ps.close();
+        }catch(IOException e){UI.println("Error occured whilst saving.");}
+    }
+    
+    // -------------- Arthur's Extra Code ----------- \\
+    
+    // takes sequence of angles and converts it 
+    // into sequence of motor signals
+    public void convert_angles_to_pwm(Arm arm){
+        // for each angle
+        for (int i=0 ; i < theta1_vector.size();i++){
+            arm.set_angles(theta1_vector.get(i),theta2_vector.get(i));
+            pwm1_vector.add(arm.get_pwm1());
+            pwm2_vector.add(arm.get_pwm2());
+        }
+    }
+    
+    
+    
     public void save_angles(String fname){
         for ( int i = 0 ; i < theta1_vector.size(); i++){
             UI.printf(" t1=%3.1f t2=%3.1f pen=%d\n",
@@ -108,48 +170,6 @@ public class ToolPath
             UI.println("Problem writing to the file statsTest.txt");
         }
 
-    }
-
-    // takes sequence of angles and converts it 
-    // into sequence of motor signals
-    public void convert_angles_to_pwm(Arm arm){
-        // for each angle
-        for (int i=0 ; i < theta1_vector.size();i++){
-            arm.set_angles(theta1_vector.get(i),theta2_vector.get(i));
-            pwm1_vector.add(arm.get_pwm1());
-            pwm2_vector.add(arm.get_pwm2());
-        }
-    }
-
-    // save file with motor control values
-    public void save_pwm_file(String fname){
-
-        //         try {
-        //             //Whatever the file path is.
-        //             File statText = new File(fname);
-        //             FileOutputStream is = new FileOutputStream(statText);
-        //             OutputStreamWriter osw = new OutputStreamWriter(is);    
-        //             Writer w = new BufferedWriter(osw);
-        //             String str_out;
-        //             for (int i = 1; i < pwm1_vector.size() ; i++){
-        //                 //str_out = String.format("%3.1f,%3.1f,%d\n",
-        //                    // theta1_vector.get(i),theta2_vector.get(i),pen_vector.get(i));
-        //                    str_out = pwm1_vector.get(i)+ "," + pwm2_vector.get(i) + "," + pwm3_vector.get(i);
-        //                 w.write(str_out);
-        //             }
-        //             w.close();
-        //         } catch (IOException e) {
-        //             UI.println("Problem writing to the file statsTest.txt");
-        //         }
-
-        try{
-            PrintStream ps = new PrintStream(new File(fname));
-            for(int i = 0; i < pwm1_vector.size()-1; i++){
-                ps.println(pwm1_vector.get(i)+ "," + pwm2_vector.get(i) + "," + pwm3_vector.get(i));
-                UI.println(pwm1_vector.get(i)+ "," + pwm2_vector.get(i) + "," + pwm3_vector.get(i));
-            }
-            ps.close();
-        }catch(IOException e){UI.println();}
     }
 
 }
