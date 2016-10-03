@@ -91,40 +91,41 @@ public class Arm
 
         // Write parameters of first motor
         String out_str = String.format("t1 = %3.1f",theta1*180/Math.PI);
-        UI.drawString(out_str, xm1-2*mr,ym1-mr/2+2*mr);
+        //UI.drawString(out_str, xm1-2*mr,ym1-mr/2+2*mr);
 
         out_str=String.format("xm1 = %d",xm1);
-        UI.drawString(out_str, xm1-2*mr,ym1-mr/2+3*mr);
+        //UI.drawString(out_str, xm1-2*mr,ym1-mr/2+3*mr);
 
         out_str=String.format("ym1 = %d",ym1);
-        UI.drawString(out_str, xm1-2*mr,ym1-mr/2+4*mr);
+        //UI.drawString(out_str, xm1-2*mr,ym1-mr/2+4*mr);
 
         // Parameters for second motor               
         out_str = String.format("t2=%3.1f",theta2*180/Math.PI);
-        UI.drawString(out_str, xm2+2*mr,ym2-mr/2+2*mr);
+        //UI.drawString(out_str, xm2+2*mr,ym2-mr/2+2*mr);
 
-        out_str=String.format("xm2=%d",xm2);
-        UI.drawString(out_str, xm2+2*mr,ym2-mr/2+3*mr);
+        //out_str = String.format("xm2=%d",xm2);
+        //UI.drawString(out_str, xm2+2*mr,ym2-mr/2+3*mr);
 
         out_str=String.format("ym2=%d",ym2);
-        UI.drawString(out_str, xm2+2*mr,ym2-mr/2+4*mr);
+        //UI.drawString(out_str, xm2+2*mr,ym2-mr/2+4*mr);
 
         // draw Field Of View
         UI.setColor(Color.GRAY);
         UI.drawRect(0,0,640,480);
 
-        //         // Draw a circle around motors 2r radius
-        //         UI.setColor(new Color(0, 0, 255));
-        //         UI.setLineWidth(1);
-        //         UI.drawOval(xm1-2*r, ym1-2*r, 2*r, 2*r);
+        // Draw a circle around motors 2r radius
+        UI.setColor(Color.BLUE);
+        UI.setLineWidth(1);
+        UI.drawOval(xm1-2*r, ym1-2*r, 4*r, 4*r);
+        
+        UI.drawOval(xm2-2*r, ym2-2*r, 4*r, 4*r);
 
-        if(!valid_state)  { UI.setColor(Color.RED); }
-        else{ UI.setColor(Color.GREEN); }
+        if(!valid_state)  { return; }
 
         UI.setLineWidth(5);
 
         // draw upper arms
-        //UI.setColor(Color.GREEN);
+        UI.setColor(Color.GREEN);
         UI.drawLine(xm1,ym1,xj1,yj1);
         UI.drawLine(xm2,ym2,xj2,yj2);
 

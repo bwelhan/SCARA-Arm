@@ -9,6 +9,8 @@ import ecs100.*;
 import java.util.*;
 import java.io.*;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 
 /** The Main Class
  * 
@@ -117,8 +119,8 @@ public class Main{
         UI.clearGraphics();
 
         // Draws the position of the mouse on the graphics pane
-        String out_str = String.format("%3.1f %3.1f",x,y);
-        UI.drawString(out_str, x+10,y+10);
+        //String out_str = String.format("%3.1f %3.1f",x,y);
+        //UI.drawString(out_str, x+10,y+10);
 
         // ---------- Handing Mouse Action -------- \\
         if(action.equals("clicked")){
@@ -347,7 +349,19 @@ public class Main{
     }
 
     public void doSend(){
-        try{Runtime.getRuntime().exec("terminal");}catch(IOException e){UI.println();}
+        String fileToSend = tool_path.getLastFile();
+        String s;
+        Process p;
+        try {
+            p = Runtime.getRuntime().exec("scp " + fileToSend + " pi@10.140.68.181:~/Arm");
+            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            while ((s = br.readLine()) != null)
+                UI.println("line: " + s);
+            p.waitFor();
+            UI.println("exit: " + p.exitValue());
+            p.destroy();
+        } catch (Exception e) {}
+
     }
 
     public void load_xy(){
